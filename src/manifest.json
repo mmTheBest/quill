@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "AI-powered reply drafting for X",
   "permissions": ["storage", "activeTab"],
-  "host_permissions": ["https://x.com/*", "https://twitter.com/*"],
+  "host_permissions": ["https://x.com/*", "https://twitter.com/*", "<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },

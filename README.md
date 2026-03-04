@@ -1,33 +1,49 @@
 # Quill
 
-AI-powered reply drafting for X (Twitter). You stay in control — Quill just writes the first draft.
+Quill is a Chrome Manifest V3 extension that drafts AI replies for X (Twitter). It keeps humans in the loop: Quill generates a draft, you review and decide what to post.
 
-## What It Does
+## MVP Features (v0.1)
 
-Quill is a Chrome extension that adds a small button next to every tweet. Click it, and AI generates a thoughtful reply based on the post content. It auto-fills the reply box. You review, edit, and post — or don't.
-
-**AI drafts. You decide.**
-
-## Features
-
-- **Smart reply drafting** — Generates context-aware replies, not generic filler
-- **Paper/article reading** — Detects links, reads the content, replies with actual insights
-- **Thread awareness** — Reads full thread context before drafting
-- **Tone control** — Insightful, casual, contrarian, or supportive
-- **Human-in-the-loop** — AI never posts. You always have final say.
+- Injects a `✎` Quill button into each tweet action bar on `x.com` and `twitter.com`
+- Extracts tweet text + author from the selected tweet
+- Calls a configurable Anthropic-compatible Messages API endpoint from the background service worker
+- Shows a floating draft overlay with:
+  - loading spinner while generating
+  - regenerate action
+  - insert action to open X reply compose and paste the draft
+- Stores endpoint/API key/model in `chrome.storage.sync` via extension popup
 
 ## Setup
 
-1. Clone this repo
-2. Open `chrome://extensions` → Enable Developer Mode
-3. Click "Load unpacked" → Select the `src/` folder
-4. Click the Quill extension icon → Enter your API endpoint and key
-5. Browse X and start drafting
+1. Open `chrome://extensions`
+2. Enable Developer mode
+3. Click `Load unpacked`
+4. Select the `src/` directory from this repo
+5. Open the Quill extension popup
+6. Configure:
+   - `API Endpoint URL` (your proxy or Anthropic-compatible `/v1/messages` endpoint)
+   - `API Key`
+   - `Model` (default: `claude-sonnet-4-20250514`)
+7. Save settings
+8. Open `https://x.com`, click the Quill button on a tweet, then generate and insert a draft
 
-## Architecture
+## API Request Format
 
-Chrome Manifest V3 extension. Content script injects UI into X, background service worker handles API calls through your configured endpoint. No backend needed.
+Quill sends an Anthropic Messages-style JSON payload:
 
-## License
+- `model`
+- `max_tokens`
+- `system`
+- `messages`
 
-MIT
+Headers:
+
+- `Content-Type: application/json`
+- `x-api-key: <your key>`
+- `anthropic-version: 2023-06-01`
+
+## Development Notes
+
+- No build step; source files in `src/`
+- Load/unload as unpacked extension during development
+- Manifest includes `<all_urls>` in `host_permissions` for configurable endpoint flexibility in MVP

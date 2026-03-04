@@ -1,2 +1,136 @@
 /* Quill content styles.
    Used for injected buttons and overlays on X. */
+
+.quill-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgb(113, 118, 123);
+  font-size: 16px;
+  padding: 8px;
+  border-radius: 50%;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.quill-btn:hover {
+  color: rgb(29, 155, 240);
+  background-color: rgba(29, 155, 240, 0.1);
+}
+
+.quill-overlay {
+  --quill-overlay-bg: rgb(22, 24, 28);
+  --quill-overlay-border: rgba(255, 255, 255, 0.12);
+  --quill-overlay-text: rgb(231, 233, 234);
+  --quill-overlay-muted: rgb(113, 118, 123);
+  --quill-overlay-hover: rgba(255, 255, 255, 0.08);
+  --quill-action-bg: rgba(29, 155, 240, 0.2);
+  --quill-action-border: rgba(29, 155, 240, 0.6);
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(100% + 8px);
+  z-index: 9999;
+  background: var(--quill-overlay-bg);
+  border: 1px solid var(--quill-overlay-border);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+}
+
+.quill-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.quill-title {
+  color: var(--quill-overlay-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quill-close {
+  border: none;
+  background: transparent;
+  color: var(--quill-overlay-muted);
+  cursor: pointer;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+}
+
+.quill-close:hover {
+  color: var(--quill-overlay-text);
+  background: var(--quill-overlay-hover);
+}
+
+.quill-draft-text {
+  color: var(--quill-overlay-text);
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  min-height: 22px;
+  margin-bottom: 12px;
+}
+
+.quill-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quill-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(29, 155, 240, 0.25);
+  border-top-color: rgb(29, 155, 240);
+  animation: quill-spin 0.9s linear infinite;
+  flex: 0 0 auto;
+}
+
+.quill-overlay-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.quill-regenerate,
+.quill-insert {
+  border: 1px solid var(--quill-overlay-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--quill-overlay-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
+.quill-regenerate:hover,
+.quill-insert:hover {
+  background: var(--quill-action-bg);
+  border-color: var(--quill-action-border);
+}
+
+@media (prefers-color-scheme: light) {
+  .quill-overlay {
+    --quill-overlay-bg: rgb(255, 255, 255);
+    --quill-overlay-border: rgba(15, 20, 25, 0.2);
+    --quill-overlay-text: rgb(15, 20, 25);
+    --quill-overlay-muted: rgb(83, 100, 113);
+    --quill-overlay-hover: rgba(15, 20, 25, 0.08);
+    box-shadow: 0 10px 24px rgba(15, 20, 25, 0.18);
+  }
+}
+
+@keyframes quill-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
