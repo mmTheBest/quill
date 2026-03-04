@@ -1,52 +1,56 @@
 // Quill background service worker.
-// Handles API requests and extension-wide messaging.
+// Handles API requests via Google Gemini API.
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "generateReply") {
     generateReply(request.tweetText, request.author, request.tone)
       .then((reply) => sendResponse({ success: true, reply }))
       .catch((err) => sendResponse({ success: false, error: err.message }));
-    return true; // Keep the message channel open for async response.
+    return true;
   }
-
   return false;
 });
 
 async function generateReply(tweetText, author, tone = "insightful") {
-  const { apiEndpoint, apiKey, model } = await chrome.storage.sync.get([
-    "apiEndpoint",
-    "apiKey",
-    "model"
-  ]);
+  const { apiKey, model } = await chrome.storage.sync.get(["apiKey", "model"]);
 
-  if (!apiEndpoint || !apiKey) {
-    throw new Error("Please configure API settings in Quill popup");
+  if (!apiKey) {
+    throw new Error("Please configure your Gemini API key in Quill settings");
   }
 
-  const systemPrompt =
-    `You are a reply drafting assistant for X (Twitter). Generate a single reply to the given tweet. ` +
-    `The reply should be ${tone}, concise (under 280 characters ideally), and show genuine engagement with the content. ` +
-    `Do not use hashtags. Do not start with "Great" or generic praise. Just output the reply text, nothing else.`;
+  const modelName = model || "gemini-2.0-flash";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  const response = await fetch(apiEndpoint, {
+  const systemPrompt = `You are a reply drafting assistant for X (Twitter). Generate a single reply to the given tweet. The reply should be ${tone}, concise (under 280 characters ideally), and show genuine engagement with the content. Do not use hashtags. Do not start with "Great" or generic praise. Just output the reply text, nothing else.`;
+
+  const response = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: model || "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      system: systemPrompt,
-      messages: [{ role: "user", content: `Tweet by ${author}:\n\n${tweetText}\n\nDraft a reply:` }]
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `Tweet by ${author}:\n\n${tweetText}\n\nDraft a reply:` }]
+        }
+      ],
+      generationConfig: {
+        maxOutputTokens: 300,
+        temperature: 0.8
+      }
     })
   });
 
   const data = await response.json();
+
   if (data.error) {
-    throw new Error(data.error.message);
+    throw new Error(data.error.message || "Gemini API error");
   }
 
-  return data.content[0].text;
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error("No response from Gemini");
+  }
+
+  return text.trim();
 }
